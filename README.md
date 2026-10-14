@@ -1,6 +1,6 @@
 # Task Manager API
 
-A REST API for creating, viewing, updating, filtering, and deleting tasks.
+A REST API for creating, viewing, updating, filtering, and deleting tasks. The project demonstrates a modular application architecture, automated testing, engineering standards, and continuous integration.
 
 ## Technology Stack
 
@@ -31,6 +31,8 @@ Supported task statuses: `todo`, `in_progress`, and `done`.
 Install Node.js 24 and npm.
 
 ### Installation
+
+Install the project dependencies:
 
 ```bash
 npm ci
@@ -92,7 +94,7 @@ npm run build
 npm test
 ```
 
-Git hooks run quality checks before commits and pushes. GitHub Actions runs the checks in CI.
+Git hooks run quality checks before commits and pushes. The pre-commit hook has been verified to block a commit when code formatting checks fail. GitHub Actions runs the quality checks in CI.
 
 ## Project Structure
 
@@ -118,12 +120,17 @@ standards/
   spec.md
   definition-of-done.md
   quality-checks.md
+  architecture-audit.md
 ```
 
 ## Engineering Standards
 
-Architecture, data model, API behavior, Architecture Decision Records, Definition of Done, and quality requirements are documented in `standards/`.
+The `standards/` directory documents the project's architecture, data model, API behavior, and data update scenarios in `spec.md`. It also contains Architecture Decision Records (ADRs) using the MADR format, a project-specific Definition of Done, quality checks, and an architecture audit.
 
 ## Development Workflow
 
-Develop changes on feature branches, run local checks, push the branch, and open a pull request. Changes should be merged only after required CI checks pass.
+Develop changes on feature branches, run local quality checks, push the branch, and open a pull request. Changes should be merged only after the required CI checks pass.
+
+## Project Status
+
+The initial application structure, REST API, SQLite data layer, automated unit and integration tests, engineering standards, Git hooks, and GitHub Actions CI workflow are implemented. The current test suite contains 15 passing tests across three test suites.
