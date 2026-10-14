@@ -1,4 +1,4 @@
-# Task Manager — Technical Specification
+# Task Manager - Technical Specification
 
 ## 1. Purpose
 
@@ -31,7 +31,7 @@ The application follows a modular layered architecture.
 
 Request flow:
 
-HTTP request → Route → Controller → Service → Repository → SQLite.
+HTTP request -> Route -> Controller -> Service -> Repository -> SQLite.
 
 ## 4. Data Model
 

@@ -1,93 +1,95 @@
-\# Architecture Audit
+# Architecture Audit
 
-\## 1. Purpose
+## 1. Purpose
 
-This audit compares the implemented Task Manager API architecture with the technical specification in `standards/spec.md`. It identifies inconsistencies and proposes corrective actions.
+This audit compares the implemented Task Manager API architecture with `standards/spec.md`. It evaluates module boundaries, identifies architectural inconsistencies, and reviews three candidates for unnecessary or incorrectly classified dependencies.
 
-\## 2. Architecture Compliance
+## 2. Architecture Compliance
 
 The application follows a layered architecture:
 
-`HTTP request → Route → Controller → Service → Repository → SQLite`
+`HTTP request -> Route -> Controller -> Service -> Repository -> SQLite`
 
-| Component | Responsibility | Assessment |
+| Component                             | Responsibility                                   | Assessment                        |
+| ------------------------------------- | ------------------------------------------------ | --------------------------------- |
+| `src/server.js`                       | Starts the HTTP server                           | Consistent with the specification |
+| `src/app.js`                          | Configures Express and mounts routes             | Consistent with the specification |
+| `src/routes/task.routes.js`           | Maps HTTP endpoints to controllers               | Consistent with the specification |
+| `src/controllers/task.controller.js`  | Handles HTTP requests and responses              | Consistent with the specification |
+| `src/services/task.service.js`        | Validates input and applies business rules       | Consistent with the specification |
+| `src/repositories/task.repository.js` | Executes database queries                        | Consistent with the specification |
+| `src/config/database.js`              | Configures SQLite and initializes the task table | Consistent with the specification |
 
-| --- | --- | --- |
+The module boundaries separate HTTP handling, business logic, and data access. This structure corresponds to the request flow defined in the specification.
 
-| `src/server.js` | Starts the HTTP server | Consistent with the specification |
+The `tasks` table contains task identifiers, titles, descriptions, statuses, deadlines, and timestamps. The status constraint is enforced in SQLite, and the service also validates allowed statuses. Tasks have no relationships to other entities in the current version.
 
-| `src/app.js` | Configures Express and middleware | Consistent with the specification |
+## 3. Findings and Corrective Actions
 
-| `src/routes/task.routes.js` | Defines API routes | Consistent with the specification |
+### Finding 1: Unused model file
 
-| `src/controllers/task.controller.js` | Handles requests and responses | Consistent with the specification |
+**Observation:** `src/models/task.model.js` was empty and had no references in the source code.
 
-| `src/services/task.service.js` | Validates input and applies business rules | Consistent with the specification |
+**Impact:** The unused file suggested the existence of a model layer that was not implemented.
 
-| `src/repositories/task.repository.js` | Executes database queries | Consistent with the specification |
+**Action:** The empty file was removed. The database schema remains defined in `src/config/database.js`.
 
-| `src/config/database.js` | Initializes SQLite and the task table | Consistent with the specification |
+### Finding 2: Incorrect package entry point
 
-The database schema includes task identifiers, titles, descriptions, statuses, deadlines, and creation and update timestamps. The status constraint is enforced in SQLite, and the service also validates allowed statuses.
+**Observation:** `package.json` specified `index.js` as the package entry point, while the application starts through `src/server.js`.
 
-\## 3. Findings and Corrective Actions
+**Impact:** The package metadata did not accurately represent the project structure.
 
-\### Finding 1: Empty model module
+**Action:** The unused `main` field was removed. The application is started through the `start` npm script.
 
-\*\*Observation:\*\* `src/models/task.model.js` was empty and had no references in the source code.
+### Finding 3: Limited build check
 
-\*\*Impact:\*\* The unused file suggested the existence of a model layer that was not actually implemented.
+**Observation:** The `build` script runs `node --check src/server.js`. This checks the syntax of the server entry file, not every source module or a bundled production build.
 
-\*\*Action:\*\* Removed the empty file. The current database schema remains defined in `src/config/database.js`.
+**Impact:** The script provides narrower validation than a full build might imply.
 
-\### Finding 2: Incorrect package entry point
-
-\*\*Observation:\*\* `package.json` specified `index.js` as the package entry point, but the application starts through `src/server.js`.
-
-\*\*Impact:\*\* The metadata did not accurately represent the project structure and could mislead users or tools that rely on the package entry point.
-
-\*\*Action:\*\* Removed the unused `main` field. The application is started through the `start` npm script.
-
-\### Finding 3: Limited build check
-
-\*\*Observation:\*\* The `build` script runs `node --check src/server.js`. This checks the syntax of the server entry file but does not independently perform a full build or check every source module.
-
-\*\*Impact:\*\* The name `build` may imply broader validation than it actually provides.
-
-\*\*Action:\*\* Documented this limitation. ESLint and automated tests provide additional validation. A future improvement could add syntax checks for every source file or introduce a dedicated build tool if the project requires bundling.
+**Action:** The limitation is documented. ESLint and automated tests provide additional validation. A broader build process is not required unless the project needs it.
 
 ## 4. Dependency Audit
 
-The project dependencies were reviewed against the application source code, test files, ESLint configuration, and npm scripts.
+The dependencies were reviewed against the application source code, tests, ESLint configuration, and npm scripts.
 
 ### 4.1. Runtime Dependencies
 
-- `express` is required to implement HTTP routes and middleware for the REST API.
-- `better-sqlite3` is required to store and retrieve tasks using SQLite.
+- `express` provides HTTP routing and middleware.
+- `better-sqlite3` provides SQLite database access.
 
-Both packages are correctly classified as runtime dependencies because the application requires them to operate.
+Both are required at runtime and are correctly classified as runtime dependencies.
 
 ### 4.2. Development Dependencies
 
-- `jest` runs unit and integration tests.
-- `supertest` sends HTTP requests in integration tests.
-- `eslint` and `@eslint/js` provide static analysis and recommended linting rules.
-- `globals` defines Node.js and Jest global variables for ESLint.
-- `prettier` checks and formats source code and documentation.
-- `husky` manages Git hooks that run project quality checks.
+- `jest` runs automated tests.
+- `supertest` supports HTTP integration tests.
+- `eslint` and `@eslint/js` provide static analysis and recommended rules.
+- `globals` configures environment-specific global variables for ESLint.
+- `prettier` formats files and checks formatting.
+- `husky` manages Git hooks.
 
-These packages are correctly classified as development dependencies because they support development, testing, formatting, and quality assurance rather than application runtime functionality.
+These packages support development and quality assurance rather than application runtime functionality.
 
-### 4.3. Three Dependency Decisions Reviewed
+### 4.3. Three Candidates for Removal or Reclassification
 
-1. **`globals`** — initially a candidate for removal because it does not implement application functionality. However, `eslint.config.js` imports it to configure Node.js and Jest globals. It is therefore necessary for the current linting configuration.
+The following candidates were investigated. They are not confirmed unnecessary dependencies; the audit found evidence that each is currently used.
 
-2. **`@eslint/js`** — initially a candidate for removal because ESLint already provides the linting engine. However, the configuration explicitly imports `js.configs.recommended`, so this package provides rules that are actively used.
+1. **`globals` — candidate for removal.** It does not implement application functionality. However, `eslint.config.js` imports it to configure Node.js and Jest globals. Removing it without changing the ESLint configuration would break that configuration.
 
-3. **`jest` and `supertest`** — reviewed for potential functional overlap. They are complementary rather than redundant: Jest runs the tests, while Supertest provides an interface for testing HTTP endpoints. Both are used by the testing setup.
+2. **`@eslint/js` — candidate for removal.** ESLint is already the linting engine, but `eslint.config.js` explicitly uses `js.configs.recommended`. The package therefore provides rules actively used by the project.
 
-### 4.4. Audit Result
+3. **`supertest` — candidate for reclassification or removal.** It is a development dependency, not a runtime dependency. The integration tests use it to send HTTP requests to the API, so removing it would require replacing the existing HTTP testing approach. Its current classification is correct.
 
-No clearly unused or incorrectly classified dependency was identified in the reviewed configuration. The three decisions above were investigated, and the packages were retained because each has a documented purpose. Dependency removal is not recommended without further evidence of unused functionality.\## 5. Conclusion
+### 4.4. Dependency Audit Result
 
-The main application modules align with the documented layered architecture. The audit identified an unused empty file, inaccurate package metadata, and a build script whose scope is narrower than its name may suggest. Corrective actions were applied to the first two findings; the build-check limitation is documented for future improvement.
+No clearly unused or incorrectly classified dependency was identified among the reviewed candidates. All three were retained because the current project configuration or tests use them.
+
+The audit therefore records three investigated candidates rather than claiming that three unnecessary dependencies actually exist. No dependency should be removed without evidence that it is unused or incorrectly classified.
+
+## 5. Conclusion
+
+The implemented application modules align with the layered architecture documented in `standards/spec.md`. The audit records three architectural findings, two of which were corrected, and documents the limitation of the current build check.
+
+Three dependency candidates were reviewed. None was confirmed to be unnecessary or incorrectly classified, so no dependency removal is justified by the available evidence.
