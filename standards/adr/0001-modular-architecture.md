@@ -10,6 +10,11 @@ The application needs to separate HTTP handling, business rules, database access
 
 Use separate modules for routes, controllers, services, repositories, and database configuration.
 
+## Alternatives Considered
+
+- **Single-module architecture:** rejected because combining HTTP handling, business logic, and database access would make testing and maintenance harder.
+- **Layered modular architecture:** selected because it separates responsibilities and allows business logic to be tested independently.
+
 ## Consequences
 
 - Each layer has a defined responsibility.
