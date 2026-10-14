@@ -1,61 +1,129 @@
-Task Manager
+# Task Manager API
 
-A task management application built with JavaScript.
+A REST API for creating, viewing, updating, filtering, and deleting tasks.
 
-About the Project
+## Technology Stack
 
-Task Manager is an application designed to help users organize their daily activities and manage tasks in one place.
+- JavaScript ES Modules
+- Node.js 24
+- Express 5
+- SQLite with better-sqlite3
+- Jest and Supertest
+- ESLint and Prettier
+- Husky Git hooks
+- GitHub Actions CI
 
-The goal of the project is to build a maintainable application with a clear architecture, documented engineering standards, and automated code quality checks.
+## Features
 
-Planned Features
-
-- Create new tasks.
-- View the list of tasks.
-- Edit task titles and descriptions.
-- Set task status: `todo`, `in_progress`, or `done`.
-- Set task deadlines.
-- Filter tasks by status.
+- Create tasks with a title, description, status, and optional deadline.
+- List all tasks or filter them by status.
+- Retrieve a task by ID.
+- Partially update an existing task.
 - Delete tasks.
+- Check API health using `/health`.
 
-Technology Stack
+Supported task statuses: `todo`, `in_progress`, and `done`.
 
-- JavaScript (ES Modules) — programming language.
-- Node.js — JavaScript runtime.
-- Express — backend framework.
-- SQLite — database.
-- Jest — automated testing.
-- ESLint — code linting.
-- Prettier — code formatting.
-- Husky — Git hooks.
-- GitHub Actions — continuous integration.
+## Getting Started
 
-Project Structure
+### Prerequisites
 
-The application will use a modular architecture with separate responsibilities for API endpoints, business logic, data access, and database models.
+Install Node.js 24 and npm.
 
-Detailed architecture and data relationships will be documented in `standards/spec.md`.
+### Installation
 
-Engineering Standards
+```bash
+npm ci
+```
 
-The project will maintain its own engineering standards in the `standards/` directory, including:
+### Run in development mode
 
-- Code formatting and linting rules.
-- Architecture specifications.
-- Architecture Decision Records (ADR).
-- Definition of Done.
-- Automated quality checks.
+```bash
+npm run dev
+```
 
-Getting Started
+### Run normally
 
-Installation and execution instructions will be added when the initial application setup is implemented.
+```bash
+npm start
+```
 
-Development Workflow
+The server runs on port 3000 by default.
 
-Changes will be developed on feature branches and submitted through pull requests.
+## API Endpoints
 
-Automated checks will validate code quality, formatting, tests, and build status before changes are merged into the main branch.
+| Method | Endpoint                 | Description            |
+| ------ | ------------------------ | ---------------------- |
+| GET    | `/health`                | Health check           |
+| GET    | `/api/tasks`             | List tasks             |
+| GET    | `/api/tasks?status=todo` | Filter tasks by status |
+| GET    | `/api/tasks/:id`         | Get a task             |
+| POST   | `/api/tasks`             | Create a task          |
+| PATCH  | `/api/tasks/:id`         | Update a task          |
+| DELETE | `/api/tasks/:id`         | Delete a task          |
 
-Project Status
+For task creation, send JSON with a non-empty `title`. The default status is `todo`.
 
-Currently in the foundation and architecture planning stage.
+Example request body:
+
+```json
+{
+  "title": "Complete the lab",
+  "description": "Finish the Task Manager API assignment",
+  "status": "todo",
+  "deadline": null
+}
+```
+
+## Quality Checks
+
+Run all local quality checks:
+
+```bash
+npm run check
+```
+
+Individual checks:
+
+```bash
+npm run format:check
+npm run lint
+npm run build
+npm test
+```
+
+Git hooks run quality checks before commits and pushes. GitHub Actions runs the checks in CI.
+
+## Project Structure
+
+```text
+src/
+  app.js
+  server.js
+  config/
+    database.js
+  controllers/
+    task.controller.js
+  routes/
+    task.routes.js
+  services/
+    task.service.js
+  repositories/
+    task.repository.js
+tests/
+  unit/
+  integration/
+standards/
+  adr/
+  spec.md
+  definition-of-done.md
+  quality-checks.md
+```
+
+## Engineering Standards
+
+Architecture, data model, API behavior, Architecture Decision Records, Definition of Done, and quality requirements are documented in `standards/`.
+
+## Development Workflow
+
+Develop changes on feature branches, run local checks, push the branch, and open a pull request. Changes should be merged only after required CI checks pass.
