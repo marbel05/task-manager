@@ -134,3 +134,10 @@ Develop changes on feature branches, run local quality checks, push the branch, 
 ## Project Status
 
 The initial application structure, REST API, SQLite data layer, automated unit and integration tests, engineering standards, Git hooks, and GitHub Actions CI workflow are implemented. The current test suite contains 15 passing tests across three test suites.
+
+## Pull Request Workflow
+
+1. Create a separate branch for each feature or documentation change.
+2. Run `npm run check` before submitting changes.
+3. Push the branch to GitHub and open a Pull Request targeting `main`.
+4. Review the changes and merge the Pull Request after successful checks.
