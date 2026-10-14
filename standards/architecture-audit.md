@@ -56,26 +56,38 @@ The database schema includes task identifiers, titles, descriptions, statuses, d
 
 \*\*Action:\*\* Documented this limitation. ESLint and automated tests provide additional validation. A future improvement could add syntax checks for every source file or introduce a dedicated build tool if the project requires bundling.
 
-\## 4. Dependency Review
+## 4. Dependency Audit
 
-The reviewed dependencies have identifiable purposes:
+The project dependencies were reviewed against the application source code, test files, ESLint configuration, and npm scripts.
 
-\- `express` provides HTTP routing and middleware.
+### 4.1. Runtime Dependencies
 
-\- `better-sqlite3` provides SQLite database access.
+- `express` is required to implement HTTP routes and middleware for the REST API.
+- `better-sqlite3` is required to store and retrieve tasks using SQLite.
 
-\- `jest` runs automated tests.
+Both packages are correctly classified as runtime dependencies because the application requires them to operate.
 
-\- `supertest` tests HTTP endpoints.
+### 4.2. Development Dependencies
 
-\- `eslint` and `@eslint/js` provide code-quality rules.
+- `jest` runs unit and integration tests.
+- `supertest` sends HTTP requests in integration tests.
+- `eslint` and `@eslint/js` provide static analysis and recommended linting rules.
+- `globals` defines Node.js and Jest global variables for ESLint.
+- `prettier` checks and formats source code and documentation.
+- `husky` manages Git hooks that run project quality checks.
 
-\- `prettier` formats source and documentation.
+These packages are correctly classified as development dependencies because they support development, testing, formatting, and quality assurance rather than application runtime functionality.
 
-\- `husky` runs Git hooks.
+### 4.3. Three Dependency Decisions Reviewed
 
-No removal of these packages is recommended based on the reviewed code. The `globals` development dependency should be checked against `eslint.config.js` before deciding whether it is necessary.
+1. **`globals`** — initially a candidate for removal because it does not implement application functionality. However, `eslint.config.js` imports it to configure Node.js and Jest globals. It is therefore necessary for the current linting configuration.
 
-\## 5. Conclusion
+2. **`@eslint/js`** — initially a candidate for removal because ESLint already provides the linting engine. However, the configuration explicitly imports `js.configs.recommended`, so this package provides rules that are actively used.
+
+3. **`jest` and `supertest`** — reviewed for potential functional overlap. They are complementary rather than redundant: Jest runs the tests, while Supertest provides an interface for testing HTTP endpoints. Both are used by the testing setup.
+
+### 4.4. Audit Result
+
+No clearly unused or incorrectly classified dependency was identified in the reviewed configuration. The three decisions above were investigated, and the packages were retained because each has a documented purpose. Dependency removal is not recommended without further evidence of unused functionality.\## 5. Conclusion
 
 The main application modules align with the documented layered architecture. The audit identified an unused empty file, inaccurate package metadata, and a build script whose scope is narrower than its name may suggest. Corrective actions were applied to the first two findings; the build-check limitation is documented for future improvement.
